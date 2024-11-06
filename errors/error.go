@@ -1,6 +1,10 @@
 package errors
 
-import "io"
+import (
+	"io"
+	"os"
+	"runtime/debug"
+)
 
 type Context struct {
 	err   error
@@ -18,7 +22,10 @@ func (ctx *Context) Throw() {
 	}
 
 	if ctx.err == nil {
-		panic(err)
+		// panic(err)
+		println("panic: ", err)
+		debug.PrintStack()
+		os.Exit(1)
 	}
 
 	panic(ctx.err)
