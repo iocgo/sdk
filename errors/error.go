@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime/debug"
+	"runtime"
 )
 
 type Context struct {
@@ -24,9 +24,19 @@ func (ctx *Context) Throw() {
 
 	if ctx.err == nil {
 		// panic(err)
-		fmt.Printf("panic: %w\n", err)
-		debug.PrintStack()
-		os.Exit(1)
+		fmt.Printf("\npanic: %v\n", err)
+		buf := make([]byte, 1024)
+		for {
+			n := runtime.Stack(buf, false)
+			if n < len(buf) {
+				buf = buf[:n]
+				break
+			}
+			buf = make([]byte, 2*len(buf))
+		}
+
+		os.Stderr.Write(buf)
+		os.Exit(2)
 	}
 
 	panic(ctx.err)
