@@ -24,22 +24,23 @@ func (ctx *Context) Throw() {
 
 	if ctx.err == nil {
 		// panic(err)
-		fmt.Printf("\npanic: %v\n", err)
-		buf := make([]byte, 1024)
-		for {
-			n := runtime.Stack(buf, false)
-			if n < len(buf) {
-				buf = buf[:n]
-				break
-			}
-			buf = make([]byte, 2*len(buf))
-		}
-
-		os.Stderr.Write(buf)
+		fmt.Printf("\npanic: %v\n\n", err)
+		os.Stderr.Write(stack())
 		os.Exit(2)
 	}
 
 	panic(ctx.err)
+}
+
+func stack() []byte {
+	buf := make([]byte, 1024)
+	for {
+		n := runtime.Stack(buf, false)
+		if n < len(buf) {
+			return buf[:n]
+		}
+		buf = make([]byte, 2*len(buf))
+	}
 }
 
 func New(catch func(err error) bool) *Context {
