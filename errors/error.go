@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"runtime/debug"
@@ -23,7 +24,7 @@ func (ctx *Context) Throw() {
 
 	if ctx.err == nil {
 		// panic(err)
-		println("panic: ", err)
+		fmt.Printf("panic: %w\n", err)
 		debug.PrintStack()
 		os.Exit(1)
 	}
