@@ -39,6 +39,12 @@ func Make_{{ replace .name "." "__" }}_proxy__(instance {{ .name }}) {{ .name }}
 	return &_{{ replace .name "." "__" }}_px__{instance}
 }
 
+func __px_if_or[T any](o any) (t T) {
+	if o == nil {
+		return
+	}
+	return o.(T)
+}
 `
 )
 
@@ -179,7 +185,7 @@ func Proxy(proc *Processor) (ops map[string][]byte) {
 					pos = 0
 					returns = strings.Join(FlatMap(OfSlice(extractReturns), func(t Argv) []string {
 						return Map(OfSlice(t.Names), func(_ string) (str string) {
-							str = fmt.Sprintf("ctx.Out[%d].(%s)", pos, t.Interface.String())
+							str = fmt.Sprintf("__px_if_or[%s](ctx.Out[%d])", t.Interface.String(), pos)
 							if !goMeta.IsBaseTyp(t.Interface.String()) {
 								packageInfo := panicOnError(goMeta.FindPackageByImports(node.Imports(), t.Interface.Alias()))
 								imports, _ = Import(imports, t.Interface.Alias(), packageInfo.ImportPath)

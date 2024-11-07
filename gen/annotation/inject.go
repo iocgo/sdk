@@ -11,7 +11,6 @@ type Inject struct {
 	N          string `annotation:"name=name,default="`
 	Alias      string `annotation:"name=alias,default="`
 	Initialize string `annotation:"name=init,default="`
-	Px         string `annotation:"name=proxy,default="`
 	Qualifier  string `annotation:"name=qualifier,default="`
 	Config     string `annotation:"name=config,default="`
 }
