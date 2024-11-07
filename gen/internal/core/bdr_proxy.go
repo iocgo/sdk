@@ -68,6 +68,13 @@ func Proxy(proc *Processor) (ops map[string][]byte) {
 					n = packageInfo.Name + "." + n[idx+1:]
 					spec = panicOnError(goMeta.GetInterfaceInfo(packageInfo.Dir, n))
 				}
+			} else {
+				packageInfo := panicOnError(goMeta.GetPackageInfo(meta.Dir()))
+				dir := panicOnError(packageInfo.FindPackageDirFor(n[:idx]))
+				packageInfo = panicOnError(goMeta.GetPackageInfo(dir))
+				imports, _ = Import(imports, packageInfo.Name, packageInfo.ImportPath)
+				n = packageInfo.Name + "." + n
+				spec = panicOnError(goMeta.GetInterfaceInfo(packageInfo.Dir, n))
 			}
 
 			instance := panicOnError(template.New(n).

@@ -3,12 +3,14 @@ module github.com/iocgo/sdk
 go 1.23.2
 
 require (
-	github.com/bincooo/go-annotation v0.0.0-20241105122225-17a965a9bd7c
+	github.com/bincooo/go-annotation v0.0.0-20241107053509-07f98c066cc4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/samber/do/v2 v2.0.0-beta.7
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 )
+
+replace github.com/samber/do/v2 v2.0.0-beta.7 => github.com/iocgo/do/v2 v2.0.0-patch.0.20241107072615-74ca0499b736
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
@@ -38,7 +40,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/samber/go-type-to-string v1.4.0 // indirect
+	github.com/samber/go-type-to-string v1.6.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect

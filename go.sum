@@ -1,5 +1,5 @@
-github.com/bincooo/go-annotation v0.0.0-20241105122225-17a965a9bd7c h1:UOU5mcA64zA+qWK1Sxz4N837HADtzInHS1VvryYAgbk=
-github.com/bincooo/go-annotation v0.0.0-20241105122225-17a965a9bd7c/go.mod h1:3ZV3/eOQJ/28O5jINzNi98+K+8WY/pOvDYidT7WWaFs=
+github.com/bincooo/go-annotation v0.0.0-20241107053509-07f98c066cc4 h1:Wh5uVa2MmIgKCgfZzMQEGG/SEmJua2tLjcN3MyN85DA=
+github.com/bincooo/go-annotation v0.0.0-20241107053509-07f98c066cc4/go.mod h1:3ZV3/eOQJ/28O5jINzNi98+K+8WY/pOvDYidT7WWaFs=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=
 github.com/bytedance/sonic v1.11.6/go.mod h1:LysEHSvpvDySVdC2f87zGWf6CIKJcAvqab1ZaiQtds4=
 github.com/bytedance/sonic/loader v0.1.1 h1:c+e5Pt1k/cy5wMveRDyk2X4B9hF4g7an8N3zCYjJFNM=
@@ -42,6 +42,8 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
+github.com/iocgo/do/v2 v2.0.0-patch.0.20241107072615-74ca0499b736 h1:snE3ewrcQgiTYQXt9BjwtSbgngh7+dFElsDyYjL29Lo=
+github.com/iocgo/do/v2 v2.0.0-patch.0.20241107072615-74ca0499b736/go.mod h1:5H6trN7cDBRSiu/rMvv8cAJAzz+ebcbUlH4AcB9+JgU=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/klauspost/cpuid/v2 v2.0.9/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
@@ -76,10 +78,8 @@ github.com/sagikazarmark/locafero v0.4.0 h1:HApY1R9zGo4DBgr7dqsTH/JJxLTTsOt7u6ke
 github.com/sagikazarmark/locafero v0.4.0/go.mod h1:Pe1W6UlPYUk/+wc/6KFhbORCfqzgYEpgQ3O5fPuL3H4=
 github.com/sagikazarmark/slog-shim v0.1.0 h1:diDBnUNK9N/354PgrxMywXnAwEr1QZcOr6gto+ugjYE=
 github.com/sagikazarmark/slog-shim v0.1.0/go.mod h1:SrcSrq8aKtyuqEI1uvTDTK1arOWRIczQRv+GVI1AkeQ=
-github.com/samber/do/v2 v2.0.0-beta.7 h1:tmdLOVSCbTA6uGWLU5poi/nZvMRh5QxXFJ9vHytU+Jk=
-github.com/samber/do/v2 v2.0.0-beta.7/go.mod h1:+LpV3vu4L81Q1JMZNSkMvSkW9lt4e5eJoXoZHkeBS4c=
-github.com/samber/go-type-to-string v1.4.0 h1:KXphToZgiFdnJQxryU25brhlh/CqY/cwJVeX2rfmow0=
-github.com/samber/go-type-to-string v1.4.0/go.mod h1:jpU77vIDoIxkahknKDoEx9C8bQ1ADnh2sotZ8I4QqBU=
+github.com/samber/go-type-to-string v1.6.1 h1:cHO/XELoP58g1dc4WuPYKIti8tMMfj95CaDotHIrdP8=
+github.com/samber/go-type-to-string v1.6.1/go.mod h1:jpU77vIDoIxkahknKDoEx9C8bQ1ADnh2sotZ8I4QqBU=
 github.com/sourcegraph/conc v0.3.0 h1:OQTbbt6P72L20UqAkXXuLOj79LfEanQ+YQFNpLA9ySo=
 github.com/sourcegraph/conc v0.3.0/go.mod h1:Sdozi7LEKbFPqYX2/J+iBAM6HpqSLTASQIKqDmF7Mt0=
 github.com/spf13/afero v1.11.0 h1:WJQKhtpdm3v2IzqG8VMqrr6Rf3UYpEF239Jy9wNepM8=

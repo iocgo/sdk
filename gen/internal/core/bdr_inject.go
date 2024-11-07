@@ -100,27 +100,6 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 				activated = append(activated, fmt.Sprintf("container.AddInitialized(func() (err error) {\n\t_, err = sdk.InvokeBean[%s](container, \"%s\")\n\treturn })", returns[0].String(), iocClass))
 			}
 
-			// 组件开启了代理
-			if proxy := inject.Px; proxy != "" {
-				ok := false
-				alias := ""
-				if strings.Contains(proxy, "/") {
-					if idx := strings.LastIndex(proxy, "."); idx > 0 {
-						imports, alias = Import(imports, "", proxy[:idx])
-						imports, _ = Import(imports, "", "github.com/iocgo/sdk/proxy")
-						pxClass := Or(alias == "", "", alias+".") + proxy[idx+1:]
-						buf.WriteString(fmt.Sprintf("sdk.Proxy[%s](container, \"%s\", func(inst %s) %s {\n", pxClass, iocClass, pxClass, pxClass))
-						buf.WriteString(fmt.Sprintf("\tinst, _ = proxy.New[%s](inst)\n", pxClass))
-						buf.WriteString("\treturn inst })\n")
-						ok = true
-					}
-				}
-
-				if !ok {
-					panic("not found proxy target: " + proxy)
-				}
-			}
-
 			pos := 1
 			// 组件分配别名
 			if n := inject.Alias; n != "" {
