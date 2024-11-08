@@ -14,8 +14,6 @@ import (
 	"sync"
 )
 
-type AnnotationBytes []byte
-
 type keys struct {
 	sync.Mutex
 	g []string
@@ -83,9 +81,18 @@ func (c *Container) AddInitialized(i func() error) {
 
 func (c *Container) Run(signals ...os.Signal) (err error) {
 	beans := ListInvokeAs[Initializer](c)
+	beans = append(beans, &singleInitializer{999, func(container *Container) (iErr error) {
+		for _, exec := range c.init {
+			if iErr = exec(); iErr != nil {
+				return iErr
+			}
+		}
+		return
+	}})
+
 	if len(beans) > 0 {
 		slices.SortFunc[[]Initializer](beans, func(a, b Initializer) int {
-			return or(a.Order() == b.Order(), 0, or(a.Order() > b.Order(), 1, -1))
+			return elseOf(a.Order() == b.Order(), 0, elseOf(a.Order() > b.Order(), 1, -1))
 		})
 
 		for _, bean := range beans {
@@ -95,11 +102,7 @@ func (c *Container) Run(signals ...os.Signal) (err error) {
 		}
 	}
 
-	for _, exec := range c.init {
-		if err = exec(); err != nil {
-			return
-		}
-	}
+	// Logger
 
 	// TODO -
 	if len(signals) > 0 {
@@ -136,8 +139,18 @@ func (c *Container) Stop() (err error) {
 	return
 }
 
+func NameOf[T any]() string {
+	return do.NameOf[T]()
+}
+
 func ProvideBean[T any](container *Container, name string, provider func() (T, error)) {
 	do.ProvideNamed[T](container.inject, name, func(i do.Injector) (T, error) {
+		return provider()
+	})
+}
+
+func ProvideTransient[T any](container *Container, name string, provider func() (T, error)) {
+	do.ProvideNamedTransient[T](container.inject, name, func(i do.Injector) (T, error) {
 		return provider()
 	})
 }
@@ -149,11 +162,13 @@ func OverrideBean[T any](container *Container, name string, provider func() (T, 
 }
 
 func InvokeBean[T any](container *Container, name string) (t T, err error) {
-	for {
-		if n, ok := container.alias[name]; ok {
-			name = n
-		} else {
-			break
+	if name != "" {
+		for {
+			if n, ok := container.alias[name]; ok {
+				name = n
+			} else {
+				break
+			}
 		}
 	}
 
@@ -165,10 +180,16 @@ func InvokeBean[T any](container *Container, name string) (t T, err error) {
 	// checked
 	value := threadLocal.Load()
 	if !value.push(name) {
+		// TODO - 未处理多例的情况
 		return zero, warpError(fmt.Errorf("acircular dependency occurs:\n%s", join(value.g, name)))
 	}
 
-	t, err = do.InvokeNamed[T](container.inject, name)
+	if name == "" {
+		t, err = do.Invoke[T](container.inject)
+	} else {
+		t, err = do.InvokeNamed[T](container.inject, name)
+	}
+
 	if err != nil {
 		return
 	}
@@ -240,7 +261,7 @@ func join(slice []string, n string) (str string) {
 	return
 }
 
-func or[T any](condition bool, a1, a2 T) T {
+func elseOf[T any](condition bool, a1, a2 T) T {
 	if condition {
 		return a1
 	} else {

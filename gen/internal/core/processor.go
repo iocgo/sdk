@@ -38,10 +38,12 @@ func init() {
 		mapping:  make(map[annotation.Node][]Convertor),
 	}
 
+	// IoC
 	annotation.Register[annotations.Gen](proc)
 	annotation.Register[annotations.Proxy](proc)
 	annotation.Register[annotations.Inject](proc)
 	annotation.Register[annotations.Router](proc)
+
 }
 
 func Alias[T any]() {
@@ -58,7 +60,7 @@ func (proc *Processor) Version() string {
 }
 
 func (proc *Processor) Name() string {
-	return "IoC"
+	return "iocgo"
 }
 
 func (proc *Processor) Process(node annotation.Node) error {
@@ -67,15 +69,9 @@ func (proc *Processor) Process(node annotation.Node) error {
 			meta := node.Meta()
 			return Wire(filepath.Join(meta.Dir(), meta.FileName()))
 		}),
-		scanAnnotated[annotations.Inject](proc, node, func(tag annotations.Inject) Builder {
-			return Inject
-		}),
-		scanAnnotated[annotations.Router](proc, node, func(tag annotations.Router) Builder {
-			return Router
-		}),
-		scanAnnotated[annotations.Proxy](proc, node, func(tag annotations.Proxy) Builder {
-			return Proxy
-		}),
+		scanAnnotated[annotations.Inject](proc, node, func(tag annotations.Inject) Builder { return Inject }),
+		scanAnnotated[annotations.Router](proc, node, func(tag annotations.Router) Builder { return Router }),
+		scanAnnotated[annotations.Proxy](proc, node, func(tag annotations.Proxy) Builder { return Proxy }),
 	)
 }
 
@@ -90,11 +86,13 @@ func (proc *Processor) Output() (ops map[string][]byte) {
 }
 
 func scanAnnotated[T annotations.M](proc *Processor, node annotation.Node, then func(t T) Builder) (err error) {
-	if node.Meta().Dir() != rootPath {
+	meta := node.Meta()
+	if meta.Dir() != rootPath {
 		return
 	}
 
 	var zero T
+	goAst := node.ASTNode()
 	slice := FindAnnotations[T](node.Annotations())
 	if len(slice) == 0 {
 		return
@@ -102,24 +100,32 @@ func scanAnnotated[T annotations.M](proc *Processor, node annotation.Node, then 
 
 	if len(slice) > 1 {
 		to := reflect.TypeOf(zero)
-		err = fmt.Errorf("expected 1 `%s` annotation, but got: %d", to.String(), len(slice))
+		err = fmt.Errorf("expected 1 `%s` annotation, but got: %d\n\t%s:%d",
+			to.String(),
+			len(slice),
+			filepath.Join(meta.Dir(), meta.FileName()),
+			node.Lookup().GetFSet().Position(goAst.Pos()).Line,
+		)
 		return
 	}
 
-	goAst := node.ASTNode()
-	zero = slice[0]
-	if err = zero.Match(goAst); err != nil {
+	if err = slice[0].Match(goAst); err != nil {
+		err = errors.Join(err, fmt.Errorf("\n\t%s:%d",
+			filepath.Join(meta.Dir(), meta.FileName()),
+			node.Lookup().GetFSet().Position(goAst.Pos()).Line,
+		))
 		return
 	}
 
-	importPath, ok := importPathMap[node.Meta().Dir()]
+	zero = toType[T](slice[0])
+	importPath, ok := importPathMap[meta.Dir()]
 	if !ok {
 		importPath = Imported{}
-		importPath.Alias, importPath.ImportPath, err = commandAsImportPath(node.Meta().Dir())
+		importPath.Alias, importPath.ImportPath, err = commandAsImportPath(meta.Dir())
 		if err != nil {
 			return
 		}
-		importPathMap[node.Meta().Dir()] = importPath
+		importPathMap[meta.Dir()] = importPath
 	}
 
 	convertor := newConvertor(zero, goAst, importPath.ImportPath)
@@ -134,8 +140,8 @@ func scanAnnotated[T annotations.M](proc *Processor, node annotation.Node, then 
 	return
 }
 
-func FindAnnotations[T any](a []annotation.Annotation) []T {
-	return Map(OfSlice(a).Filter(ofType[T]), toType[T]).ToSlice()
+func FindAnnotations[T annotations.M](a []annotation.Annotation) []annotations.M {
+	return Map(OfSlice(a).Filter(ofType[T]), func(a annotation.Annotation) annotations.M { return a.(annotations.M) }).ToSlice()
 }
 
 func ofType[T any](a annotation.Annotation) bool {

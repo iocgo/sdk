@@ -10,6 +10,7 @@ type Inject struct {
 	IsLazy     bool   `annotation:"name=lazy,default=true"`
 	N          string `annotation:"name=name,default="`
 	Alias      string `annotation:"name=alias,default="`
+	Singleton  bool   `annotation:"name=singleton,default=true"`
 	Initialize string `annotation:"name=init,default="`
 	Qualifier  string `annotation:"name=qualifier,default="`
 	Config     string `annotation:"name=config,default="`

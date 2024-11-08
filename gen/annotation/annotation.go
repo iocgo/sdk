@@ -14,32 +14,21 @@ type Anon struct {
 }
 
 func (g *Anon) Name() string {
-	var m M = g
-	for {
-		if n := m.As(); n == nil {
-			break
-		} else {
-			m = n
-		}
-	}
-	return m.Name()
+	return "anon"
 }
 
 func (g *Anon) Match(node ast.Node) error {
 	var m M = g
-	for {
-		if n := m.As(); n == nil {
-			break
-		} else {
-			m = n
-		}
+	if n := g.As(); n != nil {
+		m = n
+	}
+	if m == g {
+		return nil
 	}
 	return m.Match(node)
 }
 
-func (g *Anon) As() M {
-	panic("implement me")
-}
+func (g *Anon) As() M { return nil }
 
 func MethodReceiver(decl *ast.FuncDecl) string {
 	if decl.Recv == nil {

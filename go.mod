@@ -3,11 +3,14 @@ module github.com/iocgo/sdk
 go 1.23.2
 
 require (
-	github.com/bincooo/go-annotation v0.0.0-20241107053509-07f98c066cc4
+	github.com/bincooo/go-annotation v0.0.0-20241108042945-27c9c686ed28
 	github.com/gin-gonic/gin v1.10.0
 	github.com/samber/do/v2 v2.0.0-beta.7
+	github.com/spf13/cobra v1.8.1
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
+	github.com/tidwall/gjson v1.18.0
 )
 
 replace github.com/samber/do/v2 v2.0.0-beta.7 => github.com/iocgo/do/v2 v2.0.0-patch.0.20241107072615-74ca0499b736
@@ -28,6 +31,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -44,8 +48,9 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

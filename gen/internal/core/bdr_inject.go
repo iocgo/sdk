@@ -94,7 +94,21 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 			}
 
 			inject := convert.tag.(annotations.Inject)
-			iocClass := Or(inject.N == "", importPath+"."+returns[0].Interface.Ext(), inject.N)
+			iocClass := Or(returns[0].IsPointer && inject.N == "", "*", "") + Or(inject.N == "", importPath+"."+returns[0].Interface.Ext(), inject.N)
+			if returns[0].Interface.Alias() != "" {
+				if returns[0].Interface == "sdk.Container" {
+					goto returnLabel
+				}
+				ip, ok := lookup.FindImportByAlias(returns[0].Interface.Alias())
+				if ok {
+					importPath = ip
+					if ip != "github.com/iocgo/sdk" {
+						imports, _ = Import(imports, returns[0].Interface.Alias(), importPath)
+					}
+				}
+			}
+		returnLabel:
+
 			results, padding := joinReturn(returns)
 			if !inject.IsLazy {
 				activated = append(activated, fmt.Sprintf("container.AddInitialized(func() (err error) {\n\t_, err = sdk.InvokeBean[%s](container, \"%s\")\n\treturn })", returns[0].String(), iocClass))
@@ -105,7 +119,7 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 			if n := inject.Alias; n != "" {
 				buf.WriteString(fmt.Sprintf("container.Alias(\"%s\", \"%s\")\n", n, iocClass))
 			}
-			buf.WriteString(fmt.Sprintf("sdk.ProvideBean(container, \"%s\", func() (%s) {\n", iocClass, results))
+			buf.WriteString(fmt.Sprintf("sdk.%s(container, \"%s\", func() (%s) {\n", Or(inject.Singleton, "ProvideBean", "ProvideTransient"), iocClass, results))
 			{
 				// 参数生成
 				var vars []string
@@ -126,8 +140,10 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 							// argv.Alias(alias)
 						}
 
-						var err error
 						if argv.Interface.Alias() != "" {
+							if argv.Interface == "sdk.Container" {
+								goto argvLabel
+							}
 							ip, ok := lookup.FindImportByAlias(argv.Interface.Alias())
 							if ok {
 								importPath = ip
@@ -136,12 +152,21 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 								}
 							}
 						}
+					argvLabel:
 
-						iocClass = importPath + "." + argv.Interface.Ext()
-						if iocClass == "github.com/iocgo/sdk.AnnotationBytes" {
-							buf.WriteString(fmt.Sprintf("	%s := []byte(`%s`)\n", n, inject.Config))
+						iocClass = Or(argv.IsPointer, "*", "") + importPath + "." + argv.Interface.Ext()
+						if iocClass == "*github.com/iocgo/sdk.Container" {
+							if n != "container" {
+								buf.WriteString(fmt.Sprintf("%s := container\n", n))
+							}
 							continue
 						}
+						if argv.Interface == "string" {
+							buf.WriteString(fmt.Sprintf("	%s := `%s`\n", n, inject.Config))
+							continue
+						}
+
+						var err error
 						// 别名匹配
 						if qualifier := inject.Qualifier; qualifier != "" {
 							values := strings.Split(qualifier, ",")

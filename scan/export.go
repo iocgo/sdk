@@ -3,7 +3,7 @@ package scan
 
 import (
 	"github.com/iocgo/sdk"
-	env "github.com/iocgo/sdk/env"
+	"github.com/iocgo/sdk/env"
 )
 
 func Injects(container *sdk.Container) error {
