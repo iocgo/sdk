@@ -1,10 +1,11 @@
 package proxy
 
-type Context[T any] struct {
+import "reflect"
+
+type Context struct {
 	In,
 	Out []any
-	Name        string
-	PackageName string
-	Receiver    T
-	Do          func()
+	Name     string
+	Receiver reflect.Value
+	Do       func()
 }

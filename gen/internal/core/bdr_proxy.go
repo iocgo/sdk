@@ -18,6 +18,7 @@ var (
 	pxTemplate0 = `package {{ .package }}
 
 import (
+	"reflect"
 	"github.com/iocgo/sdk/proxy"
 {{- range $import := .imports}}
 	{{$import.String}}
@@ -27,8 +28,9 @@ import (
 {{ .code }}
 `
 	pxTemplate1 = `
+type _alias_{{ .name }}__ {{ .name }}
 type _{{ replace .name "." "__" }}_px__ struct {
-	proto {{ .name }}
+	_alias_{{ .name }}__
 }
 
 func init() {
@@ -106,6 +108,10 @@ func Proxy(proc *Processor) (ops map[string][]byte) {
 						eachMethod(m)
 					}
 				case *ast.FuncType:
+					if char := method.Names[0].String()[0]; (char >= 'a' && char <= 'z') || char == '_' { // 私有方法？？
+						return
+					}
+
 					argNames := make([]string, 0)
 					extractArguments := convert.ExtractArguments(node.Lookup(), method)
 					args := strings.Join(FlatMap(OfSlice(extractArguments), func(t Argv) []string {
@@ -139,12 +145,12 @@ func Proxy(proc *Processor) (ops map[string][]byte) {
 					buf.WriteString(line + "\n")
 					buf.WriteString(fmt.Sprintf(`func (obj *_%s_px__) %s(%s) %s {`, strings.ReplaceAll(n, ".", "__"), method.Names[0].String(), args, returns))
 					buf.WriteString(fmt.Sprintf(`
-					var ctx = &proxy.Context[%s]{
+					var ctx = &proxy.Context{
 						Name:     "%s",
-						Receiver: obj.proto,
+						Receiver: reflect.ValueOf(obj._alias_%s__),
 						In:       []any{%s},
 						Out:      []any{%s},
-					}`, n, method.Names[0].String(), strings.Join(argNames, ", "), strings.Join(returnNames, ", ")))
+					}`, method.Names[0].String(), n, strings.Join(argNames, ", "), strings.Join(returnNames, ", ")))
 
 					pos = 0
 					args = strings.Join(FlatMap(OfSlice(extractArguments), func(t Argv) []string {
@@ -170,15 +176,30 @@ func Proxy(proc *Processor) (ops map[string][]byte) {
 						vars = vars + " = "
 					}
 
+					shortN := n
+					if idx := strings.LastIndex(n, "."); idx > 0 {
+						shortN = n[idx+1:]
+					}
+
+					buf.WriteString("\n" + line)
 					buf.WriteString(fmt.Sprintf(`
-					%s
 					ctx.Do = func() {
 						%s
-						%sobj.proto.%s(%s)
+						%sobj._alias_%s__.%s(%s)
 						%s
 						%s
-					}`, line, line, vars, method.Names[0].String(), args, line, returns))
+					}`, line, vars, shortN, method.Names[0].String(), args, line, returns))
 
+					scan := convert.tag.(annotation.Proxy).Scan
+					if scan != "" {
+						buf.WriteString("\n" + line)
+						buf.WriteString(fmt.Sprintf("\n\tif !proxy.Matched(`%s`, obj._alias_%s__) {", scan, shortN))
+						if len(extractReturns) > 0 {
+							buf.WriteString(fmt.Sprintf("\n\treturn obj._alias_%s__.%s(%s)\n}", shortN, method.Names[0].String(), args))
+						} else {
+							buf.WriteString("}")
+						}
+					}
 					buf.WriteString("\n" + line)
 					buf.WriteString(fmt.Sprintf("\n\t%s(ctx)\n", convert.GetAstName()))
 

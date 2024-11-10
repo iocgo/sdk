@@ -162,7 +162,7 @@ func Inject(proc *Processor) (ops map[string][]byte) {
 							continue
 						}
 						if argv.Interface == "string" {
-							buf.WriteString(fmt.Sprintf("	%s := `%s`\n", n, inject.Config))
+							buf.WriteString(fmt.Sprintf("	%s := `%s`\n", n, strings.TrimSpace(inject.Config)))
 							continue
 						}
 
