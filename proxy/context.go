@@ -5,7 +5,7 @@ import "reflect"
 type Context struct {
 	In,
 	Out []any
-	Name     string
+	Method   string
 	Receiver reflect.Value
 	Do       func()
 }

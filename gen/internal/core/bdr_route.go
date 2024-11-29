@@ -65,19 +65,47 @@ func Router(proc *Processor) (ops map[string][]byte) {
 				}
 			}
 
+			router := convert.tag.(annotations.Router)
 			var1 := Or(receiver == "obj", "obj1", "obj")
 			var buf bytes.Buffer
 			meta := node.Meta()
-			buf.WriteString(fmt.Sprintf("//line %s:%d\n",
+
+			line := fmt.Sprintf("//line %s:%d\n",
 				filepath.Join(meta.Dir(), meta.FileName()),
 				node.Lookup().GetFSet().Position(convert.node.Pos()).Line,
-			))
-			buf.WriteString(fmt.Sprintf("route.%s(\"%s\", %s.%s)",
-				strings.ToUpper(convert.tag.(annotations.Router).Method),
-				filepath.Join(routeBaseDir, convert.tag.(annotations.Router).Path),
-				var1,
-				method),
 			)
+
+			routePaths := strings.Split(router.Path, ",")
+			for i, m := range routePaths {
+				routePaths[i] = strings.TrimSpace(m)
+			}
+
+			routeMethods := strings.Split(router.Method, ",")
+			for i, m := range routeMethods {
+				routeMethod := strings.ToUpper(strings.TrimSpace(m))
+				if routeMethod == "ANY" {
+					routeMethods = []string{"Any"}
+					break
+				}
+				routeMethods[i] = routeMethod
+			}
+
+			if routeBaseDir != "" && routeBaseDir != "/" {
+				buf.WriteString(line)
+				buf.WriteString(fmt.Sprintf("route = route.Group(\"%s\")\n", routeBaseDir))
+			}
+
+			for _, routeMethod := range routeMethods {
+				for _, routePath := range routePaths {
+					buf.WriteString(line)
+					buf.WriteString(fmt.Sprintf("route.%s(\"%s\", %s.%s)\n",
+						routeMethod,
+						routePath,
+						var1,
+						method),
+					)
+				}
+			}
 
 			if codes == nil {
 				codes = make(map[string][]string)

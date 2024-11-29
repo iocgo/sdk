@@ -9,17 +9,17 @@ import (
 )
 
 var (
-	constructorMap = make(map[string]func(any) any)
+	constructorMap = make(map[string][]func(any) (any, bool))
 )
 
-func Reg[T any](constructor func(T) T) {
+func Reg[T any](constructor func(T) (T, bool)) {
 	n, ok := generateInterfaceName[T]()
 	if !ok {
 		panic("this T type is not interface: " + n)
 	}
-	constructorMap[n] = func(obj any) any {
+	constructorMap[n] = append(constructorMap[n], func(obj any) (any, bool) {
 		return constructor(obj.(T))
-	}
+	})
 }
 
 func New[T any](t T) (T, error) {
@@ -28,8 +28,13 @@ func New[T any](t T) (T, error) {
 	if !isInter {
 		return zero, fmt.Errorf("this T type is not interface: %s" + n)
 	}
-	if constructor, ok := constructorMap[n]; ok {
-		return constructor(t).(T), nil
+	if constructors, ok := constructorMap[n]; ok {
+		for _, constructor := range constructors {
+			obj, o := constructor(t)
+			if o {
+				return obj.(T), nil
+			}
+		}
 	}
 	return zero, fmt.Errorf("no constructor found for %s", n)
 }

@@ -8,6 +8,7 @@ import (
 type Proxy struct {
 	Target string `annotation:"name=target,default="`
 	Scan   string `annotation:"name=scan,default="`
+	Igm    string `annotation:"name=igm,default="`
 }
 
 var _ M = (*Proxy)(nil)

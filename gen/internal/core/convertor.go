@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	annotation "github.com/bincooo/go-annotation/pkg"
 	gen "github.com/iocgo/sdk/gen/annotation"
 	"go/ast"
@@ -28,6 +29,7 @@ type Argv struct {
 	Names      []string
 	Interface  Interface
 	IsPointer  bool
+	IsArray    bool
 }
 
 func (i Interface) Alias() string {
@@ -142,7 +144,7 @@ func (convert *Convertor) extractArgs(lookup annotation.Lookup, results *ast.Fie
 	}
 
 	for _, re := range results.List {
-		var isPointer bool
+		var isPointer, isArray bool
 		var interfaceName string
 
 		switch expr := re.Type.(type) {
@@ -151,6 +153,9 @@ func (convert *Convertor) extractArgs(lookup annotation.Lookup, results *ast.Fie
 			interfaceName = convert.parseInterfaceName(expr.X)
 		case *ast.SelectorExpr:
 			interfaceName = convert.parseInterfaceName(expr)
+		case *ast.ArrayType:
+			isArray = true
+			interfaceName = convert.parseInterfaceName(expr.Elt)
 		default:
 			interfaceName = re.Type.(*ast.Ident).Name
 		}
@@ -175,6 +180,7 @@ func (convert *Convertor) extractArgs(lookup annotation.Lookup, results *ast.Fie
 			Interface:  Interface(interfaceName),
 			Names:      names,
 			IsPointer:  isPointer,
+			IsArray:    isArray,
 		})
 	}
 	return args
@@ -211,6 +217,25 @@ func (convert *Convertor) parseInterfaceName(expr ast.Expr) string {
 		return ex.Name
 	case *ast.SelectorExpr:
 		return ex.X.(*ast.Ident).Name + "." + ex.Sel.Name
+	case *ast.IndexExpr:
+		t := parseT(ex)
+		return convert.parseInterfaceName(ex.X) + elseOf(t != "", "["+t+"]")
 	}
 	panic("parse error")
+}
+
+func parseT(expr *ast.IndexExpr) string {
+	var genericParams []string
+	switch param := expr.Index.(type) {
+	case *ast.Ident:
+		genericParams = append(genericParams, param.Name)
+	// case *ast.BinaryExpr:
+	// 	genericParams = append(genericParams, extractBinaryExprString(param))
+	case *ast.SelectorExpr:
+		genericParams = append(genericParams,
+			fmt.Sprintf("%s.%s", param.X.(*ast.Ident).Name, param.Sel.Name))
+	case *ast.InterfaceType:
+		genericParams = append(genericParams, "interface{}")
+	}
+	return strings.Join(genericParams, ", ")
 }

@@ -28,6 +28,8 @@ var (
 
 		"map",
 
+		"bool",
+
 		"rune",
 		"string",
 		"uintptr",
@@ -75,7 +77,17 @@ func (in PackageInfo) FindPackageDirFor(packageName string) (string, error) {
 			packageDir = str
 		} else {
 			// 子包名匹配
+			if idx := strings.Index(str, "=>@"); idx > 0 {
+				str = str[idx+3:]
+			}
 			packageDir = str + strings.TrimPrefix(packageName, root)
+		}
+
+		if strings.HasPrefix(packageDir, "./") || strings.HasPrefix(packageDir, "../") {
+			if IsExist(packageDir) {
+				return packageDir, nil
+			}
+			continue
 		}
 
 		// vendor 目录查找
@@ -88,6 +100,8 @@ func (in PackageInfo) FindPackageDirFor(packageName string) (string, error) {
 			return dir, nil
 		}
 	}
+
+	// 主项目查找
 
 	// goroot 目录查找
 	if dir := filepath.Join(goRootSrcDir, packageName); IsExist(dir) {

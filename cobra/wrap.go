@@ -140,9 +140,11 @@ func bindMethod(parser gjson.Result, value reflect.Value, field string, f func(f
 
 func bindTag(cmd *cobra.Command, value reflect.Value) {
 	flags := cmd.Flags()
-	if value.Kind() == reflect.Ptr {
-		value = value.Elem()
+	if value.Kind() != reflect.Ptr {
+		panic("is not pointer: " + value.String())
 	}
+	value = value.Elem()
+
 	for i := range value.NumField() {
 		lookup, ok := value.Type().Field(i).Tag.Lookup("cobra")
 		if !ok || lookup == "" {
@@ -161,7 +163,12 @@ func bindTag(cmd *cobra.Command, value reflect.Value) {
 			flags = cmd.PersistentFlags()
 		}
 
-		setter(flags, value.Field(i), pair.Val1, short, usage)
+		field := value.Field(i)
+		if !field.CanSet() {
+			panic("this field cannot be accessed: " + pair.Val1)
+		}
+
+		setter(flags, field, pair.Val1, short, usage)
 	}
 }
 

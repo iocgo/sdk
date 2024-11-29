@@ -10,6 +10,7 @@ import (
 type Context struct {
 	err   error
 	catch func(err error) bool
+	ok    bool
 }
 
 func (ctx *Context) Error() error {
@@ -27,6 +28,10 @@ func (ctx *Context) Throw() {
 		fmt.Printf("\npanic: %v\n\n", err)
 		os.Stderr.Write(stack())
 		os.Exit(2)
+	}
+
+	if ctx.ok {
+		return
 	}
 
 	panic(ctx.err)
@@ -56,9 +61,7 @@ func panicTo(ctx *Context) {
 	}
 
 	if ctx.catch != nil {
-		if ctx.catch(ctx.err) {
-			return
-		}
+		ctx.ok = ctx.catch(ctx.err)
 	}
 
 	panic(io.EOF)

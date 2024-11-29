@@ -172,17 +172,17 @@ func InvokeBean[T any](container *Container, name string) (t T, err error) {
 		}
 	}
 
-	var zero T
-	if !threadLocal.Ex(true) {
-		defer threadLocal.Remove()
-	}
-
-	// checked
-	value := threadLocal.Load()
-	if !value.push(name) {
-		// TODO - 未处理多例的情况
-		return zero, warpError(fmt.Errorf("acircular dependency occurs:\n%s", join(value.g, name)))
-	}
+	// var zero T
+	// if !threadLocal.Ex(true) {
+	// 	defer threadLocal.Remove()
+	// }
+	//
+	// // checked
+	// value := threadLocal.Load()
+	// if !value.push(name) {
+	// 	// TODO - 未处理多例的情况
+	// 	return zero, warpError(fmt.Errorf("acircular dependency occurs:\n%s", join(value.g, name)))
+	// }
 
 	if name == "" {
 		t, err = do.Invoke[T](container.inject)
@@ -204,7 +204,7 @@ func InvokeBean[T any](container *Container, name string) (t T, err error) {
 func ListInvokeAs[T any](container *Container) (re []T) {
 	services := container.inject.ListProvidedServices()
 	for _, ser := range services {
-		t, err := do.InvokeNamed[T](container.inject, ser.Service)
+		t, err := InvokeBean[T](container, ser.Service)
 		if err == nil {
 			re = append(re, t)
 		}

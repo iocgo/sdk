@@ -18,7 +18,7 @@ func Injects(container *sdk.Container) (_ error) {
 
 func CobraInitialized() sdk.Initializer {
 	return sdk.InitializedWrapper(1000, func(container *sdk.Container) (err error) {
-		c, err := sdk.InvokeBean[cobra.ICobra](container, "rootCobra")
+		c, err := sdk.InvokeBean[cobra.ICobra](container, "cobra")
 		if err != nil {
 			return
 		}

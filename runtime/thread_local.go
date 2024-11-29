@@ -22,7 +22,7 @@ func NewThreadLocal[T any](init func() T) ThreadLocal[T] {
 }
 
 func (g goroutineLocal[T]) Load() T {
-	key := Goid()
+	key := GetCurrentGoroutineID()
 	value, ok := g.m.Load(key)
 	if !ok && g.init != nil {
 		value = g.init()
@@ -32,11 +32,11 @@ func (g goroutineLocal[T]) Load() T {
 }
 
 func (g goroutineLocal[T]) Store(value T) {
-	g.m.Store(Goid(), value)
+	g.m.Store(GetCurrentGoroutineID(), value)
 }
 
 func (g goroutineLocal[T]) Ex(init bool) (ok bool) {
-	_, ok = g.m.Load(Goid())
+	_, ok = g.m.Load(GetCurrentGoroutineID())
 	if !ok && init {
 		g.Load()
 	}
@@ -44,5 +44,5 @@ func (g goroutineLocal[T]) Ex(init bool) (ok bool) {
 }
 
 func (g goroutineLocal[T]) Remove() {
-	g.m.Delete(Goid())
+	g.m.Delete(GetCurrentGoroutineID())
 }
