@@ -1,6 +1,6 @@
 module github.com/iocgo/sdk
 
-go 1.23.2
+go 1.23.3
 
 require (
 	github.com/bincooo/go-annotation v0.0.0-20241108042945-27c9c686ed28
