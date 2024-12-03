@@ -32,7 +32,6 @@ func New() (env *Environment, err error) {
 		path = os.Args[argsLen-1]
 		goto label
 	}
-	println(environ)
 
 	for _, item := range environ {
 		if strings.HasPrefix(item, "CONFIG_PATH=") && len(item) > 12 {
