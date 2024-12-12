@@ -15,7 +15,7 @@ func AddInitialized(apply func(args ...interface{})) { inits = append(inits, app
 func AddExited(apply func(args ...interface{}))      { exits = append(exits, apply) }
 func Initialized(args ...interface{}) {
 	for _, apply := range inits {
-		apply(args)
+		apply(args...)
 	}
 
 	osSignal := make(chan os.Signal, 1)
@@ -23,7 +23,7 @@ func Initialized(args ...interface{}) {
 	go func(ch chan os.Signal) {
 		<-ch
 		for _, apply := range exits {
-			apply(args)
+			apply(args...)
 		}
 		os.Exit(0)
 	}(osSignal)
